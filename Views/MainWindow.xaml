@@ -1,0 +1,385 @@
+<Window x:Class="Sibang_generator.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Sibang_generator.ViewModels"
+        xmlns:m="clr-namespace:Sibang_generator.Models"
+        Title="시방 제작 · SIBANG GENERATOR" Height="820" Width="1180"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PanelBg}">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Grid>
+        <!-- ══════════ 설정 화면 ══════════ -->
+        <Grid Visibility="{Binding ShowPreview, Converter={StaticResource BoolVis}, ConverterParameter=invert}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 헤더 -->
+            <Border Grid.Row="0" Background="{StaticResource AccentDark}" Padding="18,12">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="시방 제작" FontSize="18" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="SIBANG GENERATOR" FontSize="12" Foreground="#AECBE6"
+                                   VerticalAlignment="Bottom" Margin="10,0,0,2" />
+                    </StackPanel>
+                    <Button Content="⚙  설정" HorizontalAlignment="Right"
+                            Background="#2C5F8A" Foreground="White"
+                            Command="{Binding OpenSettingsCommand}" />
+                </Grid>
+            </Border>
+
+            <!-- 좌우 2단 -->
+            <Grid Grid.Row="1" Margin="8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 왼쪽: 종류 · 옵션 · 모델 그룹 -->
+                <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- ① 시방 종류 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="① 시방 종류" Style="{StaticResource SectionTitle}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Content="양산 시방" IsChecked="{Binding IsMass}"
+                                                 GroupName="kind" Margin="0,0,20,0" VerticalContentAlignment="Center" />
+                                    <RadioButton Content="재작업 (구미 재작업 공정 포함)" IsChecked="{Binding IsRework}"
+                                                 GroupName="kind" VerticalContentAlignment="Center" />
+                                </StackPanel>
+                                <Separator Margin="0,10" />
+                                <TextBlock Text="상수 섹션 (0,2,3,5,7,8,9)" Style="{StaticResource FieldLabel}" />
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <Button Content="옛 시방 txt 첨부" Command="{Binding AttachConstTxtCommand}" />
+                                    <Button Content="첨부 해제" Command="{Binding ClearConstTxtCommand}" Margin="6,0,0,0" />
+                                    <TextBlock Text="{Binding ConstTxtStatus}" Style="{StaticResource FieldLabel}"
+                                               Margin="10,0,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ② 6번 단락 옵션 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="② 6. 제조환경 단락 옵션" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="각 모델 나열 단락마다 개별 설정합니다."
+                                           Style="{StaticResource FieldLabel}" Margin="0,0,0,6" />
+                                <ItemsControl ItemsSource="{Binding ParaOptions}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type m:ParaOption}">
+                                            <Border BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="0,6">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Grid.Column="0" Text="{Binding ParaLabel}"
+                                                               VerticalAlignment="Center" FontSize="12" />
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                        <RadioButton Content="전부" Margin="0,0,10,0"
+                                                            GroupName="{Binding Para}"
+                                                            IsChecked="{Binding Mode, Converter={StaticResource EnumEq}, ConverterParameter=All}" />
+                                                        <RadioButton Content="등록만" Margin="0,0,10,0"
+                                                            GroupName="{Binding Para}"
+                                                            IsChecked="{Binding Mode, Converter={StaticResource EnumEq}, ConverterParameter=RegisteredOnly}" />
+                                                        <RadioButton Content="관련그룹"
+                                                            GroupName="{Binding Para}"
+                                                            IsChecked="{Binding Mode, Converter={StaticResource EnumEq}, ConverterParameter=RelatedGroups}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 모델 · 버전 그룹 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="모델 · 버전 그룹" Style="{StaticResource SectionTitle}" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Content="+ 추가" Command="{Binding AddGroupCommand}" />
+                                        <Button Content="편집" Command="{Binding EditGroupCommand}" Margin="6,0,0,0" />
+                                        <Button Content="삭제" Command="{Binding RemoveGroupCommand}" Margin="6,0,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                                <ListView ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}"
+                                          MaxHeight="220" BorderThickness="0" Background="Transparent"
+                                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                          HorizontalContentAlignment="Stretch">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <EventSetter Event="MouseDoubleClick" Handler="Group_DoubleClick" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border Background="#F2F5F9" BorderBrush="{StaticResource Border}"
+                                                    BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,3">
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                                        <Border Background="{StaticResource Accent}" CornerRadius="4" Padding="6,2">
+                                                            <TextBlock Text="{Binding Version}" Foreground="White"
+                                                                       FontWeight="SemiBold" FontSize="12" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding Summary}" Foreground="{StaticResource TextMuted}"
+                                                                   FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                                    </StackPanel>
+                                                    <!-- 모델 버블 -->
+                                                    <ItemsControl ItemsSource="{Binding Models}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel />
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Background="White" BorderBrush="#C4D3E4"
+                                                                        BorderThickness="1" CornerRadius="10"
+                                                                        Padding="8,3" Margin="0,2,4,2">
+                                                                    <TextBlock Text="{Binding}" FontSize="11" />
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <TextBlock Text="그룹을 더블클릭하면 편집합니다."
+                                           Style="{StaticResource FieldLabel}" Margin="2,4,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 조회 결과 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <Grid>
+                                    <TextBlock Text="조회 결과 (모델별 BOM · Region · 폴더)" Style="{StaticResource SectionTitle}" />
+                                    <Button Content="새로고침" HorizontalAlignment="Right"
+                                            Command="{Binding RefreshLookupCommand}" />
+                                </Grid>
+                                <TextBlock Text="BOM/Region 이 비면 행을 더블클릭해 직접 지정하세요."
+                                           Style="{StaticResource FieldLabel}" Margin="0,0,0,6" />
+                                <ListView ItemsSource="{Binding Resolved}" Height="180"
+                                          BorderThickness="0" Background="Transparent">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <EventSetter Event="MouseDoubleClick" Handler="Resolved_DoubleClick" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                    <ListView.View>
+                                        <GridView>
+                                            <GridViewColumn Header="모델" Width="220" DisplayMemberBinding="{Binding Name}" />
+                                            <GridViewColumn Header="버전" Width="80" DisplayMemberBinding="{Binding Version}" />
+                                            <GridViewColumn Header="상태" Width="230">
+                                                <GridViewColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Status}"
+                                                                   Foreground="{Binding StatusSev, Converter={StaticResource SevBrush}}" />
+                                                    </DataTemplate>
+                                                </GridViewColumn.CellTemplate>
+                                            </GridViewColumn>
+                                        </GridView>
+                                    </ListView.View>
+                                </ListView>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- 오른쪽: 엑셀 · 폴더 · 열 매핑 -->
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="③ 엑셀 · 폴더 경로" Style="{StaticResource SectionTitle}" />
+
+                                <TextBlock Text="펌웨어 루트" Style="{StaticResource FieldLabel}" />
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding Config.FirmwareRoot, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1" Content="찾기" Command="{Binding BrowseFirmwareCommand}" Margin="6,0,0,0" />
+                                </Grid>
+
+                                <TextBlock Text="BOM 엑셀" Style="{StaticResource FieldLabel}" />
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding Config.ExcelPath, UpdateSourceTrigger=PropertyChanged}" />
+                                    <Button Grid.Column="1" Content="찾기" Command="{Binding BrowseExcelCommand}" Margin="6,0,0,0" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- BOM 시트 열 매핑 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="BOM 시트 열 매핑" Style="{StaticResource SectionTitle}" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition /><RowDefinition /><RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="시트명" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="0" Grid.Column="1" Margin="0,3,10,3" Text="{Binding Config.SheetName}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="모델명 매칭 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="0" Grid.Column="3" Margin="0,3" Text="{Binding Config.MatchColumn}" ToolTip="복수 지정 시 콤마 (예: G,H)" />
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="BOM 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="1" Grid.Column="1" Margin="0,3,10,3" Text="{Binding Config.BomColumn}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="Region 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="1" Grid.Column="3" Margin="0,3" Text="{Binding Config.RegionColumn}" />
+
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Theme 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="2" Grid.Column="1" Margin="0,3,10,3" Text="{Binding Config.ThemeColumn}" />
+                                    <CheckBox  Grid.Row="2" Grid.Column="3" Content="셀 내 여러 모델 분해"
+                                               IsChecked="{Binding Config.SplitCell}" VerticalAlignment="Center" Margin="0,3" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 재작업 관련 시트 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="재작업 관련 시트 (HW Function · 테스트 항목)" Style="{StaticResource SectionTitle}" />
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition /><RowDefinition />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="재작업 시트명" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="0" Grid.Column="1" Margin="0,3,10,3" Text="{Binding Config.ReworkSheet}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="모델명 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="0" Grid.Column="3" Margin="0,3" Text="{Binding Config.ReworkModelColumn}" />
+
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="HW Function 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="1" Grid.Column="1" Margin="0,3,10,3" Text="{Binding Config.HwFunctionColumn}" />
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="테스트항목 열" Style="{StaticResource FieldLabel}" />
+                                    <TextBox   Grid.Row="1" Grid.Column="3" Margin="0,3" Text="{Binding Config.ReworkTestColumn}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 4. 제품버전 -->
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="4. 제품버전 설정" Style="{StaticResource SectionTitle}" />
+                                <TextBlock Text="CPU" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding Config.Cpu}" Margin="0,3,0,8" />
+                                <TextBlock Text="고정 파일 접두어 (순서대로)" Style="{StaticResource FieldLabel}" />
+                                <TextBox Text="{Binding Config.FixedFilePrefixes}" Margin="0,3" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- 가운데 하단 [시방 제작] -->
+            <Border Grid.Row="2" Background="White" BorderBrush="{StaticResource Border}"
+                    BorderThickness="0,1,0,0" Padding="0,14">
+                <Button Content="시방 제작" Style="{StaticResource PrimaryButton}"
+                        HorizontalAlignment="Center" Command="{Binding GenerateCommand}" />
+            </Border>
+        </Grid>
+
+        <!-- ══════════ 미리보기 화면 ══════════ -->
+        <Grid Visibility="{Binding ShowPreview, Converter={StaticResource BoolVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="{StaticResource AccentDark}" Padding="18,12">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Content="← 설정으로" Background="#2C5F8A" Foreground="White"
+                                Click="BackToSettings_Click" />
+                        <TextBlock Text="미리보기" FontSize="16" FontWeight="Bold" Foreground="White"
+                                   VerticalAlignment="Center" Margin="16,0,0,0" />
+                        <TextBlock Text="(한글 · 영문 연속 · 저장 형태 그대로)" FontSize="12" Foreground="#AECBE6"
+                                   VerticalAlignment="Center" Margin="10,0,0,0" />
+                    </StackPanel>
+                    <Button Content="저장" HorizontalAlignment="Right" Style="{StaticResource PrimaryButton}"
+                            Padding="24,6" Command="{Binding SaveCommand}" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="360" />
+                </Grid.ColumnDefinitions>
+
+                <!-- 본문: 한글 + 영문 세로 연속 -->
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <TextBox Text="{Binding PreviewText, Mode=OneWay}" IsReadOnly="True"
+                             FontFamily="Consolas, D2Coding, Malgun Gothic" FontSize="13"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             BorderThickness="0" TextWrapping="NoWrap" />
+                </Border>
+
+                <!-- 우측: 생성 로그 상시 표시 (오류/경고 버블 + 상세) -->
+                <Border Grid.Column="1" Style="{StaticResource Card}" Margin="6,6,6,6">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="생성 로그" Style="{StaticResource SectionTitle}" />
+
+                        <!-- 오류/경고 버블 -->
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding Alerts}" Margin="0,0,0,8">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="10" Padding="8,3" Margin="0,2,4,2"
+                                            Background="{Binding Sev, Converter={StaticResource SevBrush}}">
+                                        <TextBlock Text="{Binding Msg}" Foreground="White" FontSize="11" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBox Grid.Row="2" Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True"
+                                 FontFamily="Consolas, Malgun Gothic" FontSize="12"
+                                 VerticalScrollBarVisibility="Auto" BorderThickness="0"
+                                 TextWrapping="Wrap" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
