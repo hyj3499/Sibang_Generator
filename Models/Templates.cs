@@ -2,7 +2,7 @@ namespace Sibang_generator.Models;
 
 /// <summary>
 /// 상수 섹션 0,2,3,5,7,8,9 의 본문.
-/// 옛 시방 txt 를 첨부하면 이 값들을 파싱해서 덮어쓴다.
+/// 기존 시방 txt 를 첨부하면 이 값들을 파싱해서 덮어쓴다.
 /// 첨부가 없으면 이 기본값(또는 사용자가 톱니바퀴에서 편집한 값)을 쓴다.
 ///
 /// 각 필드는 "해당 섹션의 전체 블록"(헤더 줄 포함)을 담는다.
@@ -30,13 +30,13 @@ public sealed class ConstSections
 
     public static ConstSections DefaultEn() => new()
     {
-        S0 = "0. Purpose : Mass production specification",
+        S0 = "0. Purpose : MP",
         S2 = "2. Model Type : C309",
-        S3 = "3. Application Time : Immediately after specification distribution",
+        S3 = "3. Application Time : Immediately",
         S5 = "5. Change Details : -",
         S7 = "7. Shipping environment\r\n    - Proceed by referring to the Shipping Inspection Guide",
-        S8 = "8. Stock\r\n    - None",
-        S9 = "9. Other\r\n   - None",
+        S8 = "8. Stock\r\n    - Doesn't exist",
+        S9 = "9. Other\r\n   - Doesn't exist",
     };
 }
 

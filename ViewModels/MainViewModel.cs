@@ -42,11 +42,11 @@ public sealed class MainViewModel : ObservableObject
     public bool IsMass { get => !_isRework; set { IsRework = !value; OnPropertyChanged(nameof(IsRework)); OnPropertyChanged(nameof(IsMass)); } }
     public SpecKind Kind => IsRework ? SpecKind.Rework : SpecKind.MassProduction;
 
-    // 옛 시방 txt (0,2,3,5,7,8,9 상수 출처)
+    // 기존 시방 txt (0,2,3,5,7,8,9 상수 출처)
     bool _constFromFile;
     public bool ConstFromFile { get => _constFromFile; private set => Set(ref _constFromFile, value); }
     string? _constTxtName;
-    public string ConstTxtStatus => ConstFromFile ? $"첨부됨: {_constTxtName}" : "상수 기본값 사용 (미첨부)";
+    public string ConstTxtStatus => ConstFromFile ? $"첨부됨: {_constTxtName}" : "기본 설정값 사용";
     ConstSections? _importedKo, _importedEn;
 
     // ══════════ 6번 단락 옵션 ══════════
@@ -124,10 +124,10 @@ public sealed class MainViewModel : ObservableObject
         if (dlg.ShowDialog() == true) { Config.ExcelPath = dlg.FileName; OnPropertyChanged(nameof(Config)); PersistConfig(); }
     }
 
-    // ── 옛 시방 txt 첨부 ──
+    // ── 기존 시방 txt 첨부 ──
     void AttachConstTxt(object? _)
     {
-        var dlg = new OpenFileDialog { Title = "옛 시방 txt 선택 (0,2,3,5,7,8,9 상수 출처)", Filter = "텍스트|*.txt|모든 파일|*.*" };
+        var dlg = new OpenFileDialog { Title = "기존 시방 txt 첨부 시 해당 파일의 0.시방목적, 5.변경내용, 7. 출하환경, 8. 재고, 9. 기타 내용을 파싱", Filter = "텍스트|*.txt|모든 파일|*.*" };
         if (dlg.ShowDialog() != true) return;
         try
         {

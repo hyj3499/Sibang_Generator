@@ -51,7 +51,7 @@ public sealed class ParaOption
     {
         Para.CmdRegionTheme   => "① CMD 전송 (REGION/THEME)",
         Para.HwFunction       => "② Wi-Fi / Buzzer 표시",
-        Para.RegionLangTheme  => "③ Region · Language · Theme (向)",
+        Para.RegionLangTheme  => "③ Region · Language · Theme",
         Para.ReworkGumi       => "⓪ 구미 재작업 테스트 (6-1)",
         _ => Para.ToString()
     };
@@ -110,6 +110,18 @@ public sealed class ReworkTestPair
                 En = "[UserMode] Verify language settings: Korean, English (2 languages)" },
         new() { Ko = "[UserMode] 언어설정에서 14개국 언어 있는지 확인",
                 En = "[UserMode] Verify language settings: 14 languages" },
+        new() { Ko = "[TestMode] 지역 US 변경후 UserMode전환 → UserMode로 부팅",
+                En = "[TestMode] Change region to US and switch to UserMode → Boot in UserMode" },
+        new() { Ko = "[UserMode] OTP 모델 등록 (PREMTC200)",
+                En = "[UserMode] Register OTP Model (PREMTC200)" },
+        new() { Ko = "[UserMode] SW 버전 및 모델명 (PREMTC200) 확인",
+                En = "[UserMode] Verify S/W version and model name (PREMTC200)" },
+        new() { Ko = "[UserMode] SW 버전 및 모델명 (PREMTB200B) 확인",
+                En = "[UserMode] Verify S/W version and model name (PREMTB200B)" },
+        new() { Ko = "[UserMode] Buzzer 테스트",
+                En = "[UserMode] Buzzer Test" },
+        new() { Ko = "[UserMode] 언어설정에서 영어, 프랑스어, 스페인어 3개 있는지 확인",
+                En = "[UserMode] Verify language settings: English, French, Spanish (3 languages)" },
     };
 }
 
@@ -140,15 +152,15 @@ public sealed class AppConfig
     // ── 경로 · 엑셀 (BOM) ────────────────────────
     public string FirmwareRoot { get; set; } = "";
     public string ExcelPath { get; set; } = "";
-    public string SheetName { get; set; } = "Sheet1";
-    public string MatchColumn { get; set; } = "G";     // 모델명 매칭 열 (복수 가능, 콤마)
+    public string SheetName { get; set; } = "SW 관리";
+    public string MatchColumn { get; set; } = "G, I";     // 모델명 매칭 열 (복수 가능, 콤마)
     public string BomColumn { get; set; } = "K";       // BOM 값 열
     public string RegionColumn { get; set; } = "X";    // Region 열
     public string ThemeColumn { get; set; } = "AA";    // Theme 열
     public bool SplitCell { get; set; } = true;
 
     // ── 재작업 관련 시트 (HW Function / 테스트 항목) ──
-    public string ReworkSheet { get; set; } = "재작업";
+    public string ReworkSheet { get; set; } = "재작업관련";
     public string ReworkModelColumn { get; set; } = "L";   // 모델명
     public string HwFunctionColumn { get; set; } = "M";    // Wi-Fi/Buzzer/-
     public string ReworkTestColumn { get; set; } = "N";    // 테스트 항목 통째

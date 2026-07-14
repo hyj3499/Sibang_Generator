@@ -23,7 +23,7 @@
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0" TextWrapping="Wrap" Foreground="{StaticResource TextMuted}"
                                Margin="0,0,0,8"
-                               Text="Region 코드를 한글/영문 향(向) 라벨로 매핑합니다. Language 가 비면 KOR→KOR, 나머지→ENG 로 자동 유도합니다." />
+                               Text="Region 코드를 한글/영문 라벨로 매핑합니다. Language 가 비면 KOR→KOR, 나머지→ENG 로 자동 유도합니다." />
                     <DataGrid Grid.Row="1" x:Name="RegionGrid" AutoGenerateColumns="False"
                               CanUserAddRows="True" HeadersVisibility="Column"
                               GridLinesVisibility="Horizontal" Background="White">
@@ -46,7 +46,7 @@
                 <ScrollViewer Margin="10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMuted}" Margin="0,0,0,10"
-                                   Text="옛 시방 txt 를 첨부하지 않았을 때 사용하는 0,2,3,5,7,8,9 기본 본문입니다. 헤더 줄 포함." />
+                                   Text="기존 시방 txt 를 첨부하지 않았을 때 사용하는 0,2,3,5,7,8,9 기본 본문입니다. 헤더 줄 포함." />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -92,7 +92,7 @@
             </TabItem>
 
             <!-- 6번 고정 골격 템플릿 -->
-            <TabItem Header="6. 제조환경 골격 (한/영)">
+            <TabItem Header="6. 제조환경 골격 (한↔영)">
                 <ScrollViewer Margin="10" VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMuted}" Margin="0,0,0,10"

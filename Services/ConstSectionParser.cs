@@ -6,7 +6,7 @@ using Sibang_generator.Models;
 namespace Sibang_generator.Services;
 
 /// <summary>
-/// 옛 시방 txt 첨부 시, 상수 섹션 0,2,3,5,7,8,9 를 그대로 파싱한다.
+/// 기존 시방 txt 첨부 시, 상수 섹션 0,2,3,5,7,8,9 를 그대로 파싱한다.
 ///
 /// - 한글 구간과 영문 구간을 나눈다. 영문 구간의 시작은 "0. Purpose" 키워드.
 ///   (한글 구간의 0번은 "0. 시방목적")
