@@ -140,6 +140,10 @@
                                 <TextBox Text="{Binding Ko6.LcdMiddle}" AcceptsReturn="True" MinHeight="110" Margin="0,2" />
                                 <TextBox Text="{Binding Ko6.LcdRegionIntro}" Margin="0,2" />
                                 <TextBox Text="{Binding Ko6.SwVersionLabel}" Margin="0,2" />
+                                <TextBlock Text="7) Wi-Fi 줄 · Wi-Fi 모델 있을 때 / 없을 때 / 적용모델 라벨" Style="{StaticResource FieldLabel}" Margin="0,6,0,0" />
+                                <TextBox Text="{Binding Ko6.WifiLineHasWifi}" Margin="0,2" ToolTip="Wi-Fi 표시 모델이 하나 이상 있을 때" />
+                                <TextBox Text="{Binding Ko6.WifiLineNoWifi}" Margin="0,2" ToolTip="Wi-Fi 표시 모델이 하나도 없을 때" />
+                                <TextBox Text="{Binding Ko6.WifiAppliedLabel}" Margin="0,2" ToolTip="적용모델 목록 앞에 붙는 라벨" />
                                 <TextBlock Text="재작업 소제목 (6-1 / 6-2)" Style="{StaticResource FieldLabel}" Margin="0,6,0,0" />
                                 <TextBox Text="{Binding Ko6.ReworkHeader}" Margin="0,2" />
                                 <TextBox Text="{Binding Ko6.JigHeader}" Margin="0,2" />
@@ -160,6 +164,10 @@
                                 <TextBox Text="{Binding En6.LcdMiddle}" AcceptsReturn="True" MinHeight="110" Margin="0,2" />
                                 <TextBox Text="{Binding En6.LcdRegionIntro}" Margin="0,2" />
                                 <TextBox Text="{Binding En6.SwVersionLabel}" Margin="0,2" />
+                                <TextBlock Text="7) Wi-Fi line · has Wi-Fi / no Wi-Fi / applied-models label" Style="{StaticResource FieldLabel}" Margin="0,6,0,0" />
+                                <TextBox Text="{Binding En6.WifiLineHasWifi}" Margin="0,2" ToolTip="When at least one Wi-Fi model exists" />
+                                <TextBox Text="{Binding En6.WifiLineNoWifi}" Margin="0,2" ToolTip="When no Wi-Fi model exists" />
+                                <TextBox Text="{Binding En6.WifiAppliedLabel}" Margin="0,2" ToolTip="Label before the applied-models list" />
                                 <TextBlock Text="Rework headers (6-1 / 6-2)" Style="{StaticResource FieldLabel}" Margin="0,6,0,0" />
                                 <TextBox Text="{Binding En6.ReworkHeader}" Margin="0,2" />
                                 <TextBox Text="{Binding En6.JigHeader}" Margin="0,2" />

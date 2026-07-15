@@ -355,20 +355,52 @@ public sealed class SpecGenerator
 
         // - LCD 결과
         L.Add($"{pad}    {t.LcdIntro}");
-        // 1) Wi-Fi/Buzzer 표시
+        // 1) Wi-Fi/Buzzer 표시 (Wi-Fi 모델 목록도 함께 얻는다)
         L.Add($"{pad}      {t.LcdWifiIntro}");
-        L.AddRange(Indent(ParaHw(ko, registered, allExcelModels, reworkFor, paras), pad));
-        // 2)~8) 고정, {SW} 자리에 S/W Version
+        L.AddRange(Indent(ParaHw(ko, registered, allExcelModels, reworkFor, paras, out var wifiModels), pad));
+
+        // 2)~8) 고정, {SW} 자리에 S/W Version, {WIFI} 자리에 7) Wi-Fi 줄
         var sw = SwVersionLines(ko, groups, usable, t);
         foreach (var line in t.LcdMiddle.Replace("\r\n", "\n").Split('\n'))
         {
-            if (line.Trim() == "{SW}") { foreach (var s in sw) L.Add($"{pad}{s}"); }
-            else L.Add($"{pad}      {line}");
+            var trimmed = line.Trim();
+            if (trimmed == "{SW}")
+            {
+                foreach (var s in sw) L.Add($"{pad}{s}");
+            }
+            else if (trimmed == "{WIFI}")
+            {
+                foreach (var s in WifiLines(wifiModels, t)) L.Add($"{pad}{s}");
+            }
+            else
+            {
+                L.Add($"{pad}      {line}");
+            }
         }
         // 9) Region, Language, Theme
         L.Add($"{pad}      {t.LcdRegionIntro}");
         L.AddRange(Indent(ParaRegion(ko, registered, allExcelModels, paras), pad));
 
+        return L;
+    }
+
+    /// <summary>
+    /// 7) Wi-Fi 줄을 만든다.
+    ///  - Wi-Fi 표시 모델이 하나 이상 있으면: WifiLineHasWifi + 적용모델 목록
+    ///  - 하나도 없으면: WifiLineNoWifi 만
+    /// </summary>
+    static List<string> WifiLines(List<string> wifiModels, Section6Template t)
+    {
+        var L = new List<string>();
+        if (wifiModels.Count > 0)
+        {
+            L.Add($"      {t.WifiLineHasWifi}");                                        // 7) 줄 (6칸)
+            L.Add($"          {t.WifiAppliedLabel} {string.Join(", ", wifiModels)}");  // 적용모델 (10칸)
+        }
+        else
+        {
+            L.Add($"      {t.WifiLineNoWifi}");
+        }
         return L;
     }
 
@@ -510,7 +542,8 @@ public sealed class SpecGenerator
         IReadOnlyList<ResolvedModel> registered,
         IReadOnlyList<(string Model, string? Region, string? Theme)> allExcel,
         Func<string, (string? Hw, string? Tests)> reworkFor,
-        Dictionary<Para, ParaMode> paras)
+        Dictionary<Para, ParaMode> paras,
+        out List<string> wifiModels)
     {
         // HW 는 그룹 키가 HwFunction. 관련그룹 = 같은 HW.
         // 엑셀에서 새로 끌어온 모델은 HwFunction 이 비어 있으므로 재작업 시트에서 채운다.
@@ -526,6 +559,8 @@ public sealed class SpecGenerator
                        .Select(m => m.Name).ToList();
         var buzzer = pool.Where(m => string.Equals(m.HwFunction, "Buzzer", StringComparison.OrdinalIgnoreCase))
                          .Select(m => m.Name).ToList();
+
+        wifiModels = wifi;   // 7) Wi-Fi 줄 처리에 재사용
 
         var L = new List<string>();
         if (ko)

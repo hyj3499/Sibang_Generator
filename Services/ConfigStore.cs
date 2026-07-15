@@ -44,9 +44,25 @@ public static class ConfigStore
                       ?? new AppConfig();
             // 빈 목록으로 저장된 경우 기본값 복구
             if (cfg.RegionLabels.Count == 0) cfg.RegionLabels = AppConfig.DefaultRegionLabels();
+
+            // 구버전 settings.json 호환: 새로 추가된 7) Wi-Fi 줄 필드가 비어 있으면 기본값으로 채운다
+            BackfillWifiFields(cfg.Ko6, Section6Template.DefaultKo());
+            BackfillWifiFields(cfg.En6, Section6Template.DefaultEn());
+
             return cfg;
         }
         catch { return new AppConfig(); }
+    }
+
+    /// <summary>구버전 설정에 없던 Wi-Fi 줄 필드와 {WIFI} 자리표시자를 보정한다.</summary>
+    static void BackfillWifiFields(Section6Template t, Section6Template def)
+    {
+        if (string.IsNullOrWhiteSpace(t.WifiLineHasWifi)) t.WifiLineHasWifi = def.WifiLineHasWifi;
+        if (string.IsNullOrWhiteSpace(t.WifiLineNoWifi)) t.WifiLineNoWifi = def.WifiLineNoWifi;
+        if (string.IsNullOrWhiteSpace(t.WifiAppliedLabel)) t.WifiAppliedLabel = def.WifiAppliedLabel;
+        // LcdMiddle 에 {WIFI} 자리표시자가 없으면(구버전) 기본 LcdMiddle 로 교체
+        if (!string.IsNullOrEmpty(t.LcdMiddle) && !t.LcdMiddle.Contains("{WIFI}"))
+            t.LcdMiddle = def.LcdMiddle;
     }
 
     public static void Save(AppConfig cfg)

@@ -56,9 +56,16 @@ public sealed class Section6Template
     public string TestsBody { get; set; } = "";           // 전류검사 ~ RTC 검사 (여러 줄)
     public string LcdIntro { get; set; } = "";            // "- 검사 이후에 ... User Mode 화면이 나와야 함"
     public string LcdWifiIntro { get; set; } = "";        // "1) 좌측 상단에 ... 확인"
-    public string LcdMiddle { get; set; } = "";           // 2) ~ 8) 고정 줄들
+    public string LcdMiddle { get; set; } = "";           // 2) ~ 8) 고정 줄들 ({WIFI} 자리표시자 포함)
     public string LcdRegionIntro { get; set; } = "";      // "9) Region, Language, Theme 확인"
     public string SwVersionLabel { get; set; } = "";      // "3) S/W Version" / "3) Check S/W Version"
+
+    // 7) Wi-Fi 줄: Wi-Fi 표시 모델 유무에 따라 문구가 갈린다.
+    //  - WifiLineHasWifi : 'Wi-Fi' 표시 모델이 하나 이상 있을 때 (아래에 적용모델 목록이 붙는다)
+    //  - WifiLineNoWifi  : 하나도 없을 때
+    public string WifiLineHasWifi { get; set; } = "";     // 한글 "7) Wi-Fi : OK 확인" / 영문 "7) Check Wi-Fi : '--'"
+    public string WifiLineNoWifi { get; set; } = "";      // 한글 "7) Wi-Fi : '--' 확인" / 영문 "7) Check Wi-Fi : OK"
+    public string WifiAppliedLabel { get; set; } = "";    // "-  적용모델 :" / "-  Applied models :"
 
     // 재작업 (6-1) 관련
     public string ReworkHeader { get; set; } = "";        // "6-1) 구미 재작업 공정"
@@ -90,10 +97,13 @@ public sealed class Section6Template
             "4) Temp/Humi : 현재 온도/습도 값 표시\r\n" +
             "5) Communication : OK 확인\r\n" +
             "6) IR Receiver : OK 확인\r\n" +
-            "7) Wi-Fi : '--' 확인\r\n" +
+            "{WIFI}\r\n" +
             "8) RTC : OK 확인",
         LcdRegionIntro = "9) Region, Language, Theme 확인",
         SwVersionLabel = "3) S/W Version",
+        WifiLineHasWifi = "7) Wi-Fi : OK 확인",
+        WifiLineNoWifi = "7) Wi-Fi : '--' 확인",
+        WifiAppliedLabel = "-  적용모델 :",
         ReworkHeader = "6-1) 구미 재작업 공정",
         JigHeader = "6-2) JIG 사용 공정",
     };
@@ -124,10 +134,13 @@ public sealed class Section6Template
             "4) Temp/Humi: Displays the current temperature/humidity value\r\n" +
             "5) Check Communication : OK\r\n" +
             "6) Check IR Receiver : OK\r\n" +
-            "7) Check Wi-Fi : OK\r\n" +
+            "{WIFI}\r\n" +
             "8) Check RTC : OK",
         LcdRegionIntro = "9) Check Region, Language, Theme",
         SwVersionLabel = "3) Check S/W Version",
+        WifiLineHasWifi = "7) Check Wi-Fi : OK",
+        WifiLineNoWifi = "7) Check Wi-Fi : '--'",
+        WifiAppliedLabel = "-  Applied models :",
         ReworkHeader = "6-1) Gumi Rework Process",
         JigHeader = "6-2) JIG-Aided Process",
     };
