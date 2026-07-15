@@ -16,8 +16,20 @@ public sealed class SpecGenerator
 {
     readonly AppConfig _cfg;
     readonly List<Issue> _log = new();
+    readonly HashSet<string> _known;
 
-    public SpecGenerator(AppConfig cfg) => _cfg = cfg;
+    public SpecGenerator(AppConfig cfg)
+    {
+        _cfg = cfg;
+        _known = new HashSet<string>(
+            cfg.KnownModels ?? new List<string>(), StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// 화이트리스트가 있으면, 그 안에 든 모델만 통과시킨다.
+    /// 화이트리스트가 비어 있으면(사용자가 다 지운 경우) 필터를 적용하지 않는다.
+    /// </summary>
+    bool IsKnown(string name) => _known.Count == 0 || _known.Contains(name);
 
     void Err(string m) => _log.Add(new Issue { Sev = Severity.Error, Msg = m });
     void Warn(string m) => _log.Add(new Issue { Sev = Severity.Warning, Msg = m });
@@ -170,7 +182,7 @@ public sealed class SpecGenerator
         {
             // 6-1) 구미 재작업 공정
             L.Add($"    {t.ReworkHeader}");
-            L.AddRange(Rework61(ko, registered, reworkFor, paras));
+            L.AddRange(Rework61(ko, registered, allExcelModels, reworkFor, paras));
             // 6-2) JIG 사용 공정
             L.Add($"    {t.JigHeader}");
             L.AddRange(JigProcess(ko, groups, registered, usable, allExcelModels, paras, t, indent2: true));
@@ -186,22 +198,46 @@ public sealed class SpecGenerator
     List<string> Rework61(
         bool ko,
         IReadOnlyList<ResolvedModel> registered,
+        IReadOnlyList<(string Model, string? Region, string? Theme)> allExcel,
         Func<string, (string? Hw, string? Tests)> reworkFor,
         Dictionary<Para, ParaMode> paras)
     {
         var L = new List<string>();
-        // 등록 모델 중 재작업 테스트가 있는 첫 항목을 대표로 사용
-        // (모델마다 다르면 모델별로 나눠서 출력)
-        var byTests = new Dictionary<string, List<string>>();   // 테스트 원본 → 모델들
-        var order = new List<string>();
+        var mode = paras.TryGetValue(Para.ReworkGumi, out var mm) ? mm : ParaMode.RegisteredOnly;
 
-        var pool = FilterByPara(registered, Para.ReworkGumi, paras, null);
-        foreach (var m in pool)
+        // 후보 모델 풀을 모드에 따라 구성한다.
+        //  - 등록만: 등록된 모델
+        //  - 전부:   화이트리스트에 있는 모든 모델 (엑셀 순서)
+        //  - 관련그룹: 등록 모델이 속한 "테스트 그룹"(동일 테스트 원본)에 속한 모델
+        //    → 먼저 전체 후보의 테스트를 훑어, 등록 모델과 같은 테스트를 쓰는 모델을 통째로
+        List<string> candidateNames = mode switch
         {
-            var (_, tests) = reworkFor(m.Name);
+            ParaMode.RegisteredOnly => registered.Select(r => r.Name).ToList(),
+            _ => BuildReworkCandidates(allExcel, registered)   // All · RelatedGroups 공통 후보
+        };
+
+        // (테스트 원본 → 모델들) 그룹핑. 입력 순서 유지.
+        var byTests = new Dictionary<string, List<string>>();
+        var order = new List<string>();
+        var testsOf = new Dictionary<string, string>();   // 모델 → 테스트 원본
+
+        foreach (var name in candidateNames)
+        {
+            var (_, tests) = reworkFor(name);
             if (string.IsNullOrWhiteSpace(tests)) continue;
+            testsOf[name] = tests;
             if (!byTests.ContainsKey(tests)) { byTests[tests] = new(); order.Add(tests); }
-            byTests[tests].Add(m.Name);
+            byTests[tests].Add(name);
+        }
+
+        // 관련그룹: 등록 모델이 실제로 쓰는 테스트 그룹만 남긴다.
+        if (mode == ParaMode.RelatedGroups)
+        {
+            var keepTests = new HashSet<string>(
+                registered.Select(r => r.Name)
+                          .Where(testsOf.ContainsKey)
+                          .Select(n => testsOf[n]));
+            order = order.Where(keepTests.Contains).ToList();
         }
 
         if (order.Count == 0)
@@ -217,6 +253,28 @@ public sealed class SpecGenerator
             L.AddRange(RenumberReworkTests(raw, ko));
         }
         return L;
+    }
+
+    /// <summary>
+    /// 6-1 후보 모델 이름 목록을 만든다.
+    /// 등록 모델 먼저(등록 순서 보존), 이어서 화이트리스트에 든 엑셀 모델. 중복 제거.
+    /// </summary>
+    List<string> BuildReworkCandidates(
+        IReadOnlyList<(string Model, string? Region, string? Theme)> allExcel,
+        IReadOnlyList<ResolvedModel> registered)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var list = new List<string>();
+
+        // 등록 모델 먼저 (순서 보존)
+        foreach (var r in registered)
+            if (seen.Add(r.Name)) list.Add(r.Name);
+
+        // 엑셀에서 화이트리스트에 든 모델 추가
+        foreach (var (name, _, _) in allExcel)
+            if (IsKnown(name) && seen.Add(name)) list.Add(name);
+
+        return list;
     }
 
     /// <summary>
@@ -379,12 +437,15 @@ public sealed class SpecGenerator
         {
             if (allExcel is null) return registered.ToList();
             // 엑셀 전체를 ResolvedModel 로 감싼다 (등록 순서 뒤에 나머지)
+            // 등록 모델은 항상 포함하고, 엑셀에서 새로 끌어온 항목은
+            // 화이트리스트에 있는 것만 통과시킨다 (비-모델 문구 배제).
             var byName = registered.ToDictionary(x => x.Name, x => x, StringComparer.Ordinal);
             var list = new List<ResolvedModel>();
             int order = 0;
             foreach (var (name, region, theme) in allExcel)
             {
                 if (byName.TryGetValue(name, out var r)) { list.Add(r); continue; }
+                if (!IsKnown(name)) continue;   // 화이트리스트 밖 → 조회/출력 생략
                 list.Add(new ResolvedModel { Name = name, Region = region, Theme = theme, Order = 10000 + order++ });
             }
             return list;
@@ -399,7 +460,9 @@ public sealed class SpecGenerator
             var byName = registered.ToDictionary(x => x.Name, x => x, StringComparer.Ordinal);
             foreach (var (name, region, theme) in allExcel)
             {
-                var rm = byName.TryGetValue(name, out var r) ? r
+                bool isRegistered = byName.TryGetValue(name, out var r);
+                if (!isRegistered && !IsKnown(name)) continue;   // 화이트리스트 밖 → 생략
+                var rm = isRegistered ? r!
                     : new ResolvedModel { Name = name, Region = region, Theme = theme };
                 if (keys.Contains(keySelector(rm))) pool.Add(rm);
             }

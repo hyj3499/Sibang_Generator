@@ -13,6 +13,28 @@
 
         <TabControl Grid.Row="0" Background="Transparent">
 
+            <!-- 등록 모델 (화이트리스트) -->
+            <TabItem Header="모델 등록">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" TextWrapping="Wrap" Foreground="{StaticResource TextMuted}"
+                               Margin="0,0,0,8"
+                               Text="여기 등록된 모델만 6. 제조환경의 [전부]·[관련그룹] 나열 대상이 됩니다. 엑셀 모델명 열에 섞인 헤더·설명 같은 비-모델 문구는 목록에 없으므로 자동으로 걸러집니다. 콤마 또는 줄바꿈으로 구분해 입력하세요. (비워두면 필터를 적용하지 않습니다.)" />
+                    <TextBox Grid.Row="1" x:Name="TbKnownModels" AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto" TextWrapping="Wrap"
+                             FontFamily="Consolas, Malgun Gothic" FontSize="12" Padding="6" />
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Content="기본값 복원" Click="ResetKnown_Click" />
+                        <TextBlock x:Name="KnownCount" Style="{StaticResource FieldLabel}"
+                                   Margin="10,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
             <!-- Region → 라벨 매핑 -->
             <TabItem Header="Region 라벨">
                 <Grid Margin="10">

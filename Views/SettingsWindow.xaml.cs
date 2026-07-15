@@ -40,6 +40,34 @@ public partial class SettingsWindow : Window
         _reworkPairs = new ObservableCollection<ReworkTestPair>(
             _config.ReworkTestDict.Select(Clone));
         ReworkGrid.ItemsSource = _reworkPairs;
+
+        // 등록 모델(화이트리스트) → 줄바꿈으로 표시
+        TbKnownModels.Text = string.Join("\r\n", _config.KnownModels ?? new());
+        TbKnownModels.TextChanged += (_, _) => UpdateKnownCount();
+        UpdateKnownCount();
+    }
+
+    void UpdateKnownCount()
+    {
+        var n = ParseKnown().Count;
+        KnownCount.Text = n == 0 ? "필터 미적용 (전부 통과)" : $"{n}개 모델 등록됨";
+    }
+
+    List<string> ParseKnown() =>
+        (TbKnownModels.Text ?? "")
+            .Split(new[] { ',', '\r', '\n', '\t', ';' },
+                   StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+    void ResetKnown_Click(object sender, RoutedEventArgs e)
+    {
+        var ok = MessageBox.Show(
+            "등록 모델을 기본 목록으로 되돌립니다. 진행할까요?",
+            "기본값 복원", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (ok != MessageBoxResult.Yes) return;
+        TbKnownModels.Text = string.Join("\r\n", AppConfig.DefaultKnownModels());
+        UpdateKnownCount();
     }
 
     static RegionLabel Clone(RegionLabel r) => new()
@@ -124,6 +152,9 @@ public partial class SettingsWindow : Window
                 En = (p.En ?? "").Trim()
             })
             .ToList();
+
+        // 등록 모델(화이트리스트) 반영
+        _config.KnownModels = ParseKnown();
 
         DialogResult = true;
     }
