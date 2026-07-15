@@ -187,6 +187,34 @@ public sealed class AppConfig
     //  키(한글)는 번호를 뗀 순수 문구로 저장/조회한다.
     public List<ReworkTestPair> ReworkTestDict { get; set; } = ReworkTestPair.Defaults();
 
+    // ── 등록 모델 화이트리스트 ──────────────────────
+    //  엑셀 모델명 열에는 모델이 아닌 문구(헤더, 설명 등)가 섞일 수 있다.
+    //  이 목록에 있는 모델만 "전부/관련그룹" 나열 대상으로 삼는다.
+    //  목록에 없는 값은 BOM/Region 조회 없이 건너뛴다.
+    //  비어 있으면(사용자가 전부 지운 경우) 필터를 적용하지 않는다.
+    public List<string> KnownModels { get; set; } = DefaultKnownModels();
+
+    public static List<string> DefaultKnownModels() => new()
+    {
+        "AKB76046201-16", "AKB76046201-16RC", "PREMTB200.ENCXUAE-16", "PREMTB200.ENCXUAE-16RC",
+        "AKB76046202-16", "AKB76046202-16RC", "PREMTBB20.ENCXUAE-16", "PREMTBB20.ENCXUAE-16RC",
+        "AKB76046203", "AKB76046203RC", "AKB76046204", "AKB76046204RC", "PREMTB200.AKM", "PREMTB200.AKMRC",
+        "AKB76046206", "AKB76046206RC", "CAKB76046206-", "PREMTC200.ENCXLUS", "PREMTC200.ENCXLUSRC",
+        "AKB76046205", "AKB76046205RC", "PREMTB200.ENCXCOM", "PREMTB200.ENCXCOMRC",
+        "AKB76046207", "AKB76046207RC", "CAKB76046207-", "PREMTB201.ENCXUAE", "PREMTB201.ENCXUAERC",
+        "AKB76046208", "AKB76046208RC", "PREMTB200.ENCXMEA", "PREMTB200.ENCXMEARC",
+        "AKB76046209", "AKB76046209RC", "CAKB76046209-",
+        "AKB76046210", "AKB76046210RC", "CAKB76046210-", "PREMTB200B.ENCXCOM", "PREMTB200B.ENCXCOMRC",
+        "AKB76046211", "AKB76046211RC", "CAKB76046211-",
+        "AKB76046201C", "AKB76046201CRC", "CAKB76046201C-", "PREMTB200.ENCXUAEC", "PREMTB200.ENCXUAECRC",
+        "AKB76046202C", "AKB76046202CRC", "CAKB76046202C-", "PREMTBB20.ENCXUAEC", "PREMTBB20.ENCXUAECRC",
+        "AKB76046203C", "AKB76046203CRC", "CAKB76046203C-",
+        "AKB76046204C", "AKB76046204CRC", "CAKB76046204C-", "PREMTB200.AKMC", "PREMTB200.AKMCRC",
+        "AKB76046205C", "AKB76046205CRC", "CAKB76046205C-", "PREMTB200.ENCXCOMC", "PREMTB200.ENCXCOMCRC",
+        "AKB76046206C", "AKB76046206CRC", "CAKB76046206C-", "PREMTC200.ENCXLUSC", "PREMTC200.ENCXLUSCRC",
+        "AKB76046208C", "AKB76046208CRC", "CAKB76046208C-", "PREMTB200.ENCXMEAC", "PREMTB200.ENCXMEACRC",
+    };
+
     public static List<RegionLabel> DefaultRegionLabels() => new()
     {
         new() { Region = "UAE",    Ko = "UAE향",            En = "For UAE",                    Language = "ENG" },
