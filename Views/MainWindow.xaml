@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Sibang_generator.ViewModels"
         xmlns:m="clr-namespace:Sibang_generator.Models"
-        Title="시방 제작 · SIBANG GENERATOR" Height="820" Width="1180"
+        Title="시방 제작 · SIBANG GENERATOR" Height="980" Width="1180"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource PanelBg}">
 

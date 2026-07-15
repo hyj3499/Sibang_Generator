@@ -240,7 +240,9 @@ public sealed class MainViewModel : ObservableObject
         { Owner = Application.Current.MainWindow };
         if (dlg.ShowDialog() == true)
         {
-            var grp = Groups.FirstOrDefault(g => g.Models.Contains(rm.Name));
+            // 동일 모델이 여러 버전에 있을 수 있으므로 버전까지 매칭
+            var grp = Groups.FirstOrDefault(g =>
+                g.Version == rm.Version && g.Models.Contains(rm.Name));
             if (grp is not null && dlg.SelectedBom is not null)
                 grp.BomOverrides[rm.Name] = dlg.SelectedBom;
             RefreshLookup();
