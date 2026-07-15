@@ -18,11 +18,19 @@
     <!-- WPF + 리플렉션 기반 라이브러리는 트리밍과 충돌하므로 끔 -->
     <PublishTrimmed>false</PublishTrimmed>
     <SatelliteResourceLanguages>ko;en</SatelliteResourceLanguages>
+
+    <!-- 앱 아이콘 (작업표시줄/실행파일). logo.png 가 프로젝트 루트에 있어야 함 -->
+    <ApplicationIcon Condition="Exists('logo.ico')">logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.102.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- logo.png 를 리소스로 포함 (창 상단 로고 · 창 아이콘에 사용) -->
+  <ItemGroup>
+    <Resource Include="logo.png" Condition="Exists('logo.png')" />
   </ItemGroup>
 
 </Project>
