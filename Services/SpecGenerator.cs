@@ -185,11 +185,11 @@ public sealed class SpecGenerator
             L.AddRange(Rework61(ko, registered, allExcelModels, reworkFor, paras));
             // 6-2) JIG 사용 공정
             L.Add($"    {t.JigHeader}");
-            L.AddRange(JigProcess(ko, groups, registered, usable, allExcelModels, paras, t, indent2: true));
+            L.AddRange(JigProcess(ko, groups, registered, usable, allExcelModels, reworkFor, paras, t, indent2: true));
         }
         else
         {
-            L.AddRange(JigProcess(ko, groups, registered, usable, allExcelModels, paras, t, indent2: false));
+            L.AddRange(JigProcess(ko, groups, registered, usable, allExcelModels, reworkFor, paras, t, indent2: false));
         }
         return L;
     }
@@ -332,6 +332,7 @@ public sealed class SpecGenerator
         IReadOnlyList<ResolvedModel> registered,
         IReadOnlyList<ResolvedModel> usable,
         IReadOnlyList<(string Model, string? Region, string? Theme)> allExcelModels,
+        Func<string, (string? Hw, string? Tests)> reworkFor,
         Dictionary<Para, ParaMode> paras,
         Section6Template t,
         bool indent2)
@@ -356,7 +357,7 @@ public sealed class SpecGenerator
         L.Add($"{pad}    {t.LcdIntro}");
         // 1) Wi-Fi/Buzzer 표시
         L.Add($"{pad}      {t.LcdWifiIntro}");
-        L.AddRange(Indent(ParaHw(ko, registered, paras), pad));
+        L.AddRange(Indent(ParaHw(ko, registered, allExcelModels, reworkFor, paras), pad));
         // 2)~8) 고정, {SW} 자리에 S/W Version
         var sw = SwVersionLines(ko, groups, usable, t);
         foreach (var line in t.LcdMiddle.Replace("\r\n", "\n").Split('\n'))
@@ -507,10 +508,19 @@ public sealed class SpecGenerator
     List<string> ParaHw(
         bool ko,
         IReadOnlyList<ResolvedModel> registered,
+        IReadOnlyList<(string Model, string? Region, string? Theme)> allExcel,
+        Func<string, (string? Hw, string? Tests)> reworkFor,
         Dictionary<Para, ParaMode> paras)
     {
         // HW 는 그룹 키가 HwFunction. 관련그룹 = 같은 HW.
-        var pool = FilterByPara(registered, Para.HwFunction, paras, m => m.HwFunction);
+        // 엑셀에서 새로 끌어온 모델은 HwFunction 이 비어 있으므로 재작업 시트에서 채운다.
+        var pool = FilterByPara(registered, Para.HwFunction, paras, m => m.HwFunction, allExcel);
+        foreach (var m in pool)
+            if (string.IsNullOrEmpty(m.HwFunction))
+            {
+                var (hw, _) = reworkFor(m.Name);
+                m.HwFunction = hw;
+            }
 
         var wifi = pool.Where(m => string.Equals(m.HwFunction, "Wi-Fi", StringComparison.OrdinalIgnoreCase))
                        .Select(m => m.Name).ToList();
