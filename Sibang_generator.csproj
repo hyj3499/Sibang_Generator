@@ -19,7 +19,7 @@
     <PublishTrimmed>false</PublishTrimmed>
     <SatelliteResourceLanguages>ko;en</SatelliteResourceLanguages>
 
-    <!-- 앱 아이콘 (작업표시줄/실행파일). logo.png 가 프로젝트 루트에 있어야 함 -->
+    <!-- 앱 아이콘 (탐색기/작업표시줄의 실행파일 아이콘). 빌드 전에 logo.png → logo.ico 로 자동 변환됨 -->
     <ApplicationIcon Condition="Exists('logo.ico')">logo.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -32,5 +32,19 @@
   <ItemGroup>
     <Resource Include="logo.png" Condition="Exists('logo.png')" />
   </ItemGroup>
+
+  <!--
+    빌드 전에 logo.png 가 있고 logo.ico 가 없으면 자동으로 .ico 를 생성한다.
+    (실행파일 자체 아이콘은 .ico 만 인식하므로, 사용자가 png 만 넣어도 되도록)
+    PowerShell + System.Drawing 으로 256px 아이콘을 만든다.
+  -->
+  <Target Name="GenerateIcoFromPng" BeforeTargets="BeforeBuild"
+          Condition="Exists('logo.png') And !Exists('logo.ico')">
+    <Exec ContinueOnError="true"
+          Command="powershell -NoProfile -ExecutionPolicy Bypass -Command &quot;Add-Type -AssemblyName System.Drawing; $src=[System.Drawing.Image]::FromFile('$(MSBuildProjectDirectory)\logo.png'); $bmp=New-Object System.Drawing.Bitmap $src,256,256; $h=$bmp.GetHicon(); $ico=[System.Drawing.Icon]::FromHandle($h); $fs=New-Object System.IO.FileStream('$(MSBuildProjectDirectory)\logo.ico',[System.IO.FileMode]::Create); $ico.Save($fs); $fs.Close(); $ico.Dispose(); $bmp.Dispose(); $src.Dispose()&quot;" />
+    <PropertyGroup Condition="Exists('logo.ico')">
+      <ApplicationIcon>logo.ico</ApplicationIcon>
+    </PropertyGroup>
+  </Target>
 
 </Project>
